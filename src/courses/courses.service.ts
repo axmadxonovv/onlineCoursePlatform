@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
@@ -19,9 +19,21 @@ export class CoursesService {
   findAll() {
     return this.courseRepo.find();
   }
+  async update(id: number, dto: CreateCourseDto) {
+    await this.courseRepo.update(id, dto);
+    const updated = await this.courseRepo.findOneBy({ id });
+    if (!updated) {
+      throw new NotFoundException(`Course with ID ${id} not found`);
+    }
+    return updated;
+  }
 
-  update(id: number, dto: CreateCourseDto) {
-    return this.courseRepo.update(id, dto);
+  async findOne(id: number) {
+    const course = await this.courseRepo.findOne({ where: { id } });
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${id} not found`);
+    }
+    return course;
   }
 
   remove(id: number) {

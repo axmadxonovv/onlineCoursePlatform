@@ -1,13 +1,17 @@
 import {
-  Body,
   Controller,
   Post,
-  Req,
+  Body,
+  UseGuards,
   Res,
+  Req,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { Response, Request } from 'express';
 
@@ -18,6 +22,13 @@ export class AuthController {
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin') // faqat adminlar foydalanadi
+  @Post('admin-create')
+  createByAdmin(@Body() dto: RegisterDto) {
+    return this.authService.createByAdmin(dto);
   }
 
   @Post('login')

@@ -9,4 +9,6 @@ export class RegisterDto {
 
   @ApiProperty({ example: 'strongPassword123' })
   password: string;
+
+  role: 'student' | 'admin' | 'teacher';
 }

@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -25,7 +26,10 @@ export class CoursesController {
   findAll() {
     return this.coursesService.findAll();
   }
-
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.coursesService.findOne(id);
+  }
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
