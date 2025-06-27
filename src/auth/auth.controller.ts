@@ -24,13 +24,6 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin') // faqat adminlar foydalanadi
-  @Post('admin-create')
-  createByAdmin(@Body() dto: RegisterDto) {
-    return this.authService.createByAdmin(dto);
-  }
-
   @Post('login')
   async login(
     @Body() dto: LoginDto,

@@ -19,15 +19,6 @@ export class AuthService {
     });
   }
 
-  async createByAdmin(registerDto: RegisterDto) {
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    return this.usersService.create({
-      ...registerDto,
-      password: hashedPassword,
-      // bu yerda role ni o'zimiz kiritamiz
-    });
-  }
-
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) throw new UnauthorizedException('User not found');

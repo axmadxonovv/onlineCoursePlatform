@@ -1,42 +1,51 @@
 // src/lessons/lessons.controller.ts
 import {
-  Controller,
-  Get,
-  Post,
-  Param,
   Body,
+  Controller,
+  Param,
+  Post,
+  Get,
   Put,
   Delete,
-  ParseIntPipe,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateLessonDto } from './dto/create-lesson.dto';
+import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { LessonsService } from './lessons.service';
 
-@Controller()
+@ApiTags('lessons')
+@Controller('modules/:moduleId/lessons')
 export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) {}
 
-  @Post('/modules/:moduleId/lessons')
-  create(@Param('moduleId', ParseIntPipe) moduleId: number, @Body() body: any) {
-    return this.lessonsService.create(moduleId, body);
+  @Post()
+  createLesson(
+    @Param('moduleId') moduleId: number,
+    @Body() createLessonDto: CreateLessonDto,
+  ) {
+    return this.lessonsService.create(moduleId, createLessonDto);
   }
 
-  @Get('/modules/:moduleId/lessons')
-  findByModule(@Param('moduleId', ParseIntPipe) moduleId: number) {
-    return this.lessonsService.findAllByModule(moduleId);
+  @Get()
+  getLessons(@Param('moduleId') moduleId: number) {
+    return this.lessonsService.findAll(moduleId);
   }
 
-  @Get('/lessons/:id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  @Get(':id')
+  getLesson(@Param('id') id: number) {
     return this.lessonsService.findOne(id);
   }
 
-  @Put('/lessons/:id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
-    return this.lessonsService.update(id, body);
+  @Put(':id')
+  updateLesson(
+    @Param('id') id: number,
+    @Body() updateLessonDto: UpdateLessonDto,
+  ) {
+    return this.lessonsService.update(id, updateLessonDto);
   }
 
-  @Delete('/lessons/:id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  @Delete(':id')
+  deleteLesson(@Param('id') id: number) {
     return this.lessonsService.remove(id);
   }
 }

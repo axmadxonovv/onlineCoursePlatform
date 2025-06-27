@@ -3,46 +3,46 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Lesson } from './entities/lesson.entity';
-import { Module } from '../modules/entities/module.entity';
+import { CreateLessonDto } from './dto/create-lesson.dto';
+import { UpdateLessonDto } from './dto/update-lesson.dto';
 
 @Injectable()
 export class LessonsService {
   constructor(
     @InjectRepository(Lesson)
-    private lessonsRepo: Repository<Lesson>,
-
-    @InjectRepository(Module)
-    private modulesRepo: Repository<Module>,
+    private lessonsRepository: Repository<Lesson>,
   ) {}
 
-  async create(moduleId: number, data: Partial<Lesson>) {
-    const module = await this.modulesRepo.findOne({ where: { id: moduleId } });
-    if (!module) throw new NotFoundException('Module not found');
-
-    const lesson = this.lessonsRepo.create({ ...data, module });
-    return this.lessonsRepo.save(lesson);
-  }
-
-  async findAllByModule(moduleId: number) {
-    return this.lessonsRepo.find({
-      where: { module: { id: moduleId } },
+  async create(
+    moduleId: number,
+    createLessonDto: CreateLessonDto,
+  ): Promise<Lesson> {
+    const lesson = this.lessonsRepository.create({
+      ...createLessonDto,
+      moduleId,
     });
+    return this.lessonsRepository.save(lesson);
   }
 
-  async findOne(id: number) {
-    const lesson = await this.lessonsRepo.findOne({ where: { id } });
-    if (!lesson) throw new NotFoundException('Lesson not found');
+  async findAll(moduleId: number): Promise<Lesson[]> {
+    return this.lessonsRepository.find({ where: { moduleId } });
+  }
+
+  async findOne(id: number): Promise<Lesson> {
+    const lesson = await this.lessonsRepository.findOneBy({ id });
+    if (!lesson) {
+      throw new NotFoundException('Lesson not found');
+    }
     return lesson;
   }
 
-  async update(id: number, data: Partial<Lesson>) {
+  async update(id: number, updateLessonDto: UpdateLessonDto): Promise<Lesson> {
     const lesson = await this.findOne(id);
-    Object.assign(lesson, data);
-    return this.lessonsRepo.save(lesson);
+    Object.assign(lesson, updateLessonDto);
+    return this.lessonsRepository.save(lesson);
   }
 
-  async remove(id: number) {
-    const lesson = await this.findOne(id);
-    return this.lessonsRepo.remove(lesson);
+  async remove(id: number): Promise<void> {
+    await this.lessonsRepository.delete(id);
   }
 }
