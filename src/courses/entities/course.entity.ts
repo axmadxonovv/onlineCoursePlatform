@@ -1,5 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// src/courses/entities/course.entity.ts
+
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Module as CourseModule } from '../../modules/entities/module.entity';
 
 @Entity()
 export class Course {
@@ -30,4 +33,7 @@ export class Course {
   @Column()
   @ApiProperty()
   level: string;
+
+  @OneToMany(() => CourseModule, (module) => module.course)
+  modules: CourseModule[];
 }
