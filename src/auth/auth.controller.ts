@@ -1,29 +1,46 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { User } from '../users/user.entity';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { Response, Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   @Post('register')
-  async register(
-    @Body() body: { name: string; email: string; password: string },
-  ) {
-    return this.authService.register(body.name, body.email, body.password);
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
   @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    const user = await this.authService.validateUser(body.email, body.password);
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
-    return this.authService.login(user);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const user = await this.authService.validateUser(dto.email, dto.password);
+    const tokens = await this.authService.login(user);
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: false,
+    });
+
+    return { accessToken: tokens.accessToken };
   }
 
   @Post('refresh')
-  async refresh(@Body() body: { refreshToken: string }) {
-    // Refresh tokenni yangilash uchun metod qo‘shish
+  async refresh(@Req() req: Request) {
+    const token = req.cookies?.refreshToken;
+    if (!token) throw new UnauthorizedException('No refresh token');
+    return this.authService.refresh(token);
   }
 }

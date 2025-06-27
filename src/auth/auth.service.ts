@@ -1,43 +1,65 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
-import * as bcrypt from 'bcrypt';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
-  async register(name: string, email: string, password: string): Promise<User> {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.userRepository.create({
-      name,
-      email,
+  async register(registerDto: RegisterDto) {
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    return this.usersService.create({
+      ...registerDto,
       password: hashedPassword,
       role: 'student',
     });
-    return this.userRepository.save(user);
   }
 
-  login(user: User) {
-    const payload: JwtPayload = { email: user.email, sub: user.id };
+  async validateUser(email: string, password: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) throw new UnauthorizedException('Wrong password');
+
+    return user;
+  }
+
+  login(user: any) {
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: 'REFRESH_SECRET',
+      expiresIn: '7d',
+    });
+
     return {
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      accessToken,
+      refreshToken,
     };
   }
 
-  async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      return user;
+  refresh(token: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: 'REFRESH_SECRET',
+      });
+
+      return {
+        accessToken: this.jwtService.sign({
+          sub: payload.sub,
+          email: payload.email,
+          role: payload.role,
+        }),
+      };
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
     }
-    return null;
   }
 }
