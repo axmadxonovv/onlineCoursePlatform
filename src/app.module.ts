@@ -13,6 +13,7 @@ import { ResultsModule } from './result/result.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: '.env',
       isGlobal: true,
     }),
     TypeOrmModule.forFeature([Modulee, Lesson]),
