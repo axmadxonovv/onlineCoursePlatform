@@ -4,10 +4,11 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Module } from '../../modules/entities/module.entity';
 import { User } from '../../users/user.entity';
-
+import { Result } from 'src/result/entities/result.entity';
 @Entity()
 export class Assignment {
   @PrimaryGeneratedColumn()
@@ -32,4 +33,7 @@ export class Assignment {
 
   @Column()
   studentId: number;
+
+  @OneToMany(() => Result, (result) => result.assignment)
+  results: Result[];
 }

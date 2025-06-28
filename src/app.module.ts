@@ -9,6 +9,7 @@ import { Module as Modulee } from './modules/entities/module.entity';
 import { LessonsModule } from './lessons/lessons.module';
 import { ModulesModule } from './modules/modules.module';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { ResultsModule } from './result/result.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -29,6 +30,7 @@ import { AssignmentsModule } from './assignments/assignments.module';
     LessonsModule,
     ModulesModule,
     AssignmentsModule,
+    ResultsModule,
   ],
 })
 export class AppModule {}

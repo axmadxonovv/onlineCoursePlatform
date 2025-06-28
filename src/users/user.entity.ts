@@ -1,5 +1,6 @@
 // src/users/user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Result } from 'src/result/entities/result.entity';
 
 @Entity()
 export class User {
@@ -17,4 +18,7 @@ export class User {
 
   @Column({ default: 'student' })
   role: 'student' | 'admin' | 'teacher';
+
+  @OneToMany(() => Result, (result) => result.student)
+  results: Result[];
 }

@@ -7,6 +7,7 @@ import {
   Put,
   Param,
   Get,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AssignmentsService } from './assignments.service';
@@ -15,6 +16,10 @@ import { UpdateAssignmentGradeDto } from './dto/update-assignment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+
+// MUHIM: express'ni to'g'ri import qilish
+import { Request as ExpressRequest, Request } from 'express';
+import { User } from 'src/users/user.entity';
 
 @ApiTags('assignments')
 @ApiBearerAuth()
@@ -27,30 +32,29 @@ export class AssignmentsController {
   @Post()
   createAssignment(
     @Body() createAssignmentDto: CreateAssignmentDto,
-    @Req() req,
+    @Req() req: Request & { user: User }, // <== to'g'ri typelash
   ) {
-    // Student ID req.user.id dan olinadi
-    return this.assignmentsService.create(createAssignmentDto, req.user.id);
+    return this.assignmentsService.create(createAssignmentDto, req?.user?.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('teacher')
   @Put(':id/grade')
-  gradeAssignment(
-    @Param('id') id: number,
-    @Body() updateAssignmentGradeDto: UpdateAssignmentGradeDto,
-    @Req() req,
+  async gradeAssignment(
+    @Param('id', ParseIntPipe) assignmentId: number,
+    @Body() dto: UpdateAssignmentGradeDto,
+    @Req() req: Request & { user: User }, // <== to'g'ri typelash
   ) {
     return this.assignmentsService.gradeAssignment(
-      id,
+      assignmentId,
       req.user.id,
-      updateAssignmentGradeDto.grade,
+      dto.grade,
     );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  getStudentAssignments(@Req() req) {
+  getStudentAssignments(@Req() req: Request & { user: User }) {
     return this.assignmentsService.findByStudent(req.user.id);
   }
 }
