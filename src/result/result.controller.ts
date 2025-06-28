@@ -10,7 +10,7 @@ export class ResultController {
   constructor(private readonly resultService: ResultService) {}
 
   @Post()
-  @Roles('admin') // faqat admin baho qo'yadi
+  @Roles('student')
   async create(@Body() dto: CreateResultDto) {
     return this.resultService.create(dto);
   }

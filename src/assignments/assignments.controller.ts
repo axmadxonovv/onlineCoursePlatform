@@ -1,3 +1,4 @@
+// src/assignments/assignments.controller.ts
 import {
   Controller,
   Post,
@@ -12,13 +13,11 @@ import {
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
-import { UpdateAssignmentGradeDto } from './dto/update-assignment.dto';
+import { UpdateAssignmentGradeDto } from './dto/update-assignment-grade.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-
-// MUHIM: express'ni to'g'ri import qilish
-import { Request as ExpressRequest, Request } from 'express';
+import { Request } from 'express';
 import { User } from 'src/users/user.entity';
 
 @ApiTags('assignments')
@@ -28,22 +27,22 @@ export class AssignmentsController {
   constructor(private readonly assignmentsService: AssignmentsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('student')
+  @Roles('teacher')
   @Post()
   createAssignment(
-    @Body() createAssignmentDto: CreateAssignmentDto,
-    @Req() req: Request & { user: User }, // <== to'g'ri typelash
+    @Body() dto: CreateAssignmentDto,
+    @Req() req: Request & { user: User },
   ) {
-    return this.assignmentsService.create(createAssignmentDto, req?.user?.id);
+    return this.assignmentsService.create(dto, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('teacher')
   @Put(':id/grade')
-  async gradeAssignment(
+  gradeAssignment(
     @Param('id', ParseIntPipe) assignmentId: number,
     @Body() dto: UpdateAssignmentGradeDto,
-    @Req() req: Request & { user: User }, // <== to'g'ri typelash
+    @Req() req: Request & { user: User },
   ) {
     return this.assignmentsService.gradeAssignment(
       assignmentId,

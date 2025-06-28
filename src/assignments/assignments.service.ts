@@ -1,3 +1,4 @@
+// src/assignments/assignments.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -7,7 +8,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Assignment } from './entities/assignment.entity';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
-import { UpdateAssignmentGradeDto } from './dto/update-assignment-grade.dto';
 
 @Injectable()
 export class AssignmentsService {
@@ -21,8 +21,7 @@ export class AssignmentsService {
     studentId: number,
   ): Promise<Assignment> {
     const assignment = this.assignmentsRepository.create({
-      content: createAssignmentDto.content,
-      moduleId: createAssignmentDto.moduleId,
+      ...createAssignmentDto,
       studentId,
     });
     return this.assignmentsRepository.save(assignment);
@@ -37,11 +36,11 @@ export class AssignmentsService {
       where: { id: assignmentId },
       relations: ['module', 'module.teacher'],
     });
+
     if (!assignment) {
       throw new NotFoundException('Assignment not found');
     }
 
-    // Teacher faqat o'z modulidagi assignmentlarni baholashi mumkin
     if (assignment.module.teacher.id !== teacherId) {
       throw new ForbiddenException(
         'Siz ushbu topshiriqni baholashga ruxsatga ega emassiz',
@@ -53,6 +52,9 @@ export class AssignmentsService {
   }
 
   async findByStudent(studentId: number): Promise<Assignment[]> {
-    return this.assignmentsRepository.find({ where: { studentId } });
+    return this.assignmentsRepository.find({
+      where: { studentId },
+      relations: ['module'],
+    });
   }
 }
