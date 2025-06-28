@@ -8,6 +8,7 @@ import { Lesson } from './lessons/entities/lesson.entity';
 import { Module as Modulee } from './modules/entities/module.entity';
 import { LessonsModule } from './lessons/lessons.module';
 import { ModulesModule } from './modules/modules.module';
+import { AssignmentsModule } from './assignments/assignments.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -27,6 +28,7 @@ import { ModulesModule } from './modules/modules.module';
     CoursesModule,
     LessonsModule,
     ModulesModule,
+    AssignmentsModule,
   ],
 })
 export class AppModule {}
