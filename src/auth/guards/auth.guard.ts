@@ -1,4 +1,3 @@
-// src/common/guards/auth.guard.ts
 import {
   CanActivate,
   ExecutionContext,
@@ -15,7 +14,8 @@ export class AuthGuard implements CanActivate {
     private configService: ConfigService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    // async qo'shildi
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
 
@@ -25,12 +25,14 @@ export class AuthGuard implements CanActivate {
 
     const token = authHeader.split(' ')[1];
     try {
-      const payload = this.jwtService.verify(token, {
+      const payload = await this.jwtService.verifyAsync(token, {
+        // verifyAsync ishlatildi
         secret: this.configService.get<string>('JWT_SECRET'),
       });
       request.user = payload;
       return true;
     } catch (err) {
+      console.error(err); // Xatolikni konsolga chiqarish
       throw new UnauthorizedException('Noto‘g‘ri token');
     }
   }

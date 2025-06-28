@@ -12,7 +12,9 @@ import { AssignmentsModule } from './assignments/assignments.module';
 import { ResultsModule } from './result/result.module';
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forFeature([Modulee, Lesson]),
     TypeOrmModule.forRoot({
       type: 'postgres',

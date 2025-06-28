@@ -3,6 +3,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateResultDto } from './dto/create-result.dto';
 import { ResultService } from './result.service';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { User } from 'src/users/user.entity';
 
 @UseGuards(JwtAuthGuard)
 @Controller('results')
@@ -10,9 +12,10 @@ export class ResultController {
   constructor(private readonly resultService: ResultService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('student')
-  async create(@Body() dto: CreateResultDto) {
-    return this.resultService.create(dto);
+  create(@Body() dto: CreateResultDto, @Req() req: Request & { user: User }) {
+    return this.resultService.create(dto, req.user.id);
   }
 
   @Get()

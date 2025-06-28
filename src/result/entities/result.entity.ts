@@ -7,17 +7,15 @@ export class Result {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  grade: number;
-
-  @Column({ nullable: true })
-  feedback: string;
-
-  @ManyToOne(() => Assignment, (assignment) => assignment.results, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Assignment)
   assignment: Assignment;
 
-  @ManyToOne(() => User, (user) => user.results)
+  @ManyToOne(() => User)
   student: User;
+
+  @Column()
+  answer: string;
+
+  @Column({ nullable: true })
+  grade?: number;
 }

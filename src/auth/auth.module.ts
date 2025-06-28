@@ -10,7 +10,7 @@ import { JwtStrategy } from './jwt.strategy';
     UsersModule,
     JwtModule.register({
       secret: 'JWT_SECRET', // .env dan olingan bo‘lsa yaxshi
-      signOptions: { expiresIn: '15m' }, // Access token muddati
+      signOptions: { expiresIn: '1d' }, // Access token muddati
     }),
   ],
   providers: [AuthService, JwtStrategy],
